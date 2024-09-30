@@ -6,6 +6,7 @@ import time
 from sklearn import preprocessing
 
 # Setup
+
 num_neuron = 128
 learn_rate = 0.001
 
@@ -18,82 +19,134 @@ ss_x = preprocessing.StandardScaler()
 x_disp = ss_x.fit_transform(x_disp.reshape(-1, 2))
 x_elas = ss_x.fit_transform(x_elas.reshape(-1, 2))
 
-# Define neural network architectures
-class ElasticityNetwork(nn.Module):
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+# Define elasticity network
+
+class ElasticityNet(nn.Module):
     def __init__(self):
-        super(ElasticityNetwork, self).__init__()
-        self.layers = nn.Sequential(
-            nn.Linear(2, num_neuron), nn.ReLU(),
-            *[nn.Sequential(nn.Linear(num_neuron, num_neuron), nn.ReLU()) for _ in range(11)],
-            nn.Linear(num_neuron, 1)
-        )
+        super(ElasticityNet, self).__init__()
+        self.fc1 = nn.Linear(2, num_neuron)
+        self.fc2 = nn.Linear(num_neuron, num_neuron)
+        self.fc3 = nn.Linear(num_neuron, num_neuron)
+        self.fc4 = nn.Linear(num_neuron, num_neuron)
+        self.fc5 = nn.Linear(num_neuron, num_neuron)
+        self.fc6 = nn.Linear(num_neuron, num_neuron)
+        self.fc7 = nn.Linear(num_neuron, num_neuron)
+        self.fc8 = nn.Linear(num_neuron, num_neuron)
+        self.fc9 = nn.Linear(num_neuron, num_neuron)
+        self.fc10 = nn.Linear(num_neuron, num_neuron)
+        self.fc11 = nn.Linear(num_neuron, num_neuron)
+        self.fc12 = nn.Linear(num_neuron, num_neuron)
+        self.fc13 = nn.Linear(num_neuron, num_neuron)
+        self.fc14 = nn.Linear(num_neuron, num_neuron)
+        self.fc15 = nn.Linear(num_neuron, num_neuron)
+        self.fc16 = nn.Linear(num_neuron, num_neuron)
+        self.fc17 = nn.Linear(num_neuron, 1)
 
     def forward(self, x):
-        return self.layers(x)
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
+        x = torch.relu(self.fc3(x))
+        x = torch.relu(self.fc4(x))
+        x = torch.relu(self.fc5(x))
+        x = torch.relu(self.fc6(x))
+        x = torch.relu(self.fc7(x))
+        x = torch.relu(self.fc8(x))
+        x = torch.relu(self.fc9(x))
+        x = torch.relu(self.fc10(x))
+        x = torch.relu(self.fc11(x))
+        x = torch.relu(self.fc12(x))
+        x = torch.relu(self.fc13(x))
+        x = torch.relu(self.fc14(x))
+        x = torch.relu(self.fc15(x))
+        x = torch.relu(self.fc16(x))
+        return self.fc17(x)
 
-class DisplacementNetwork(nn.Module):
+
+# Define displacement network
+
+class DisplacementNet(nn.Module):
     def __init__(self):
-        super(DisplacementNetwork, self).__init__()
-        self.layers = nn.Sequential(
-            nn.Linear(2, num_neuron), nn.SiLU(),
-            *[nn.Sequential(nn.Linear(num_neuron, num_neuron), nn.SiLU()) for _ in range(11)],
-            nn.Linear(num_neuron, 1)
-        )
+        super(DisplacementNet, self).__init__()
+        self.fc1 = nn.Linear(2, num_neuron)
+        self.fc2 = nn.Linear(num_neuron, num_neuron)
+        self.fc3 = nn.Linear(num_neuron, num_neuron)
+        self.fc4 = nn.Linear(num_neuron, num_neuron)
+        self.fc5 = nn.Linear(num_neuron, num_neuron)
+        self.fc6 = nn.Linear(num_neuron, num_neuron)
+        self.fc7 = nn.Linear(num_neuron, num_neuron)
+        self.fc8 = nn.Linear(num_neuron, num_neuron)
+        self.fc9 = nn.Linear(num_neuron, num_neuron)
+        self.fc10 = nn.Linear(num_neuron, num_neuron)
+        self.fc11 = nn.Linear(num_neuron, num_neuron)
+        self.fc12 = nn.Linear(num_neuron, num_neuron)
+        self.fc13 = nn.Linear(num_neuron, num_neuron)
+        self.fc14 = nn.Linear(num_neuron, num_neuron)
+        self.fc15 = nn.Linear(num_neuron, num_neuron)
+        self.fc16 = nn.Linear(num_neuron, num_neuron)
+        self.fc17 = nn.Linear(num_neuron, 1)
 
     def forward(self, x):
-        return self.layers(x)
+        x = torch.nn.functional.silu(self.fc1(x))
+        x = torch.nn.functional.silu(self.fc2(x))
+        x = torch.nn.functional.silu(self.fc3(x))
+        x = torch.nn.functional.silu(self.fc4(x))
+        x = torch.nn.functional.silu(self.fc5(x))
+        x = torch.nn.functional.silu(self.fc6(x))
+        x = torch.nn.functional.silu(self.fc7(x))
+        x = torch.nn.functional.silu(self.fc8(x))
+        x = torch.nn.functional.silu(self.fc9(x))
+        x = torch.nn.functional.silu(self.fc10(x))
+        x = torch.nn.functional.silu(self.fc11(x))
+        x = torch.nn.functional.silu(self.fc12(x))
+        x = torch.nn.functional.silu(self.fc13(x))
+        x = torch.nn.functional.silu(self.fc14(x))
+        x = torch.nn.functional.silu(self.fc15(x))
+        return self.fc17(x)
 
-elasticity_net = ElasticityNetwork()
-disp_net = DisplacementNetwork()
 
-# Define optimizer
-optimizer = optim.Adam(list(elasticity_net.parameters()) + list(disp_net.parameters()), lr=learn_rate)
+# Initialize models, optimizer, and loss function
 
-# Read displacements
-y_u = torch.tensor(y_disp[:, 0], dtype=torch.float32)
-y_disp_tensor = torch.tensor(y_disp, dtype=torch.float32)
+elasticity_net = ElasticityNet().to(device)
+displacement_net = DisplacementNet().to(device)
+optimizer = optim.Adam(list(elasticity_net.parameters()) + list(displacement_net.parameters()), lr=learn_rate)
+criterion = nn.L1Loss()
 
-# Calculate strains (define conv2d function)
-def conv2d(x, weight):
-    return nn.functional.conv2d(x, weight, stride=1, padding=0)
-
-# Initialize conv weights (you will need to adapt this part according to your original logic)
-conv_x = torch.tensor([[[-0.5]], [[-0.5]]], dtype=torch.float32)
-conv_y = torch.tensor([[[0.5]], [[-0.5]]], dtype=torch.float32)
+x_elas = torch.tensor(x_elas, dtype=torch.float32).to(device)
+x_disp = torch.tensor(x_disp, dtype=torch.float32).to(device)
+y_disp = torch.tensor(y_disp, dtype=torch.float32).to(device)
+y_elas = torch.tensor(y_elas, dtype=torch.float32).to(device)
 
 # Training process
+
 start_time = time.time()
+
 for i in range(200001):
+    elasticity_net.train()
+    displacement_net.train()
+
     optimizer.zero_grad()
-    
-    # Forward pass
-    x_elas_tensor = torch.tensor(x_elas, dtype=torch.float32)
-    x_disp_tensor = torch.tensor(x_disp, dtype=torch.float32)
-    
-    y_pred_m = elasticity_net(x_elas_tensor)
-    y_pred_v = disp_net(x_disp_tensor)
 
-    # Calculate strains here (you'll need to implement these calculations)
-    # For example, calculating fx_conv_sum_norm and fy_conv_sum_norm:
-    # Placeholder calculations; replace these with your actual logic
-    fx_conv_sum_norm = torch.randn_like(y_pred_m)  # Example tensor, replace with real calculation
-    fy_conv_sum_norm = torch.randn_like(y_pred_v)  # Example tensor, replace with real calculation
+    y_pred_m = elasticity_net(x_elas).squeeze()
+    y_pred_v = displacement_net(x_disp).squeeze()
 
-    # Calculate loss
-    mean_modu = torch.mean(torch.tensor(y_elas, dtype=torch.float32))
-    loss_x = torch.mean(torch.abs(fx_conv_sum_norm))
-    loss_y = torch.mean(torch.abs(fy_conv_sum_norm))
-    loss_m = torch.abs(torch.mean(y_pred_m) - mean_modu)
-    loss_v = torch.abs(torch.mean(y_pred_v))
-    loss = loss_x + loss_y + loss_m / 100 + loss_v / 100
-    
-    # Backward pass and optimization
+    # Define losses based on strain and displacement
+
+    loss_m = torch.abs(y_pred_m.mean() - y_elas.mean())
+    loss_v = torch.abs(y_pred_v.mean() - y_disp[:, 0].mean())
+    loss = loss_m + loss_v
+
     loss.backward()
     optimizer.step()
-    
-    print(i, loss.item())
 
-# Save predictions
-np.savetxt('y_pred_m_final', y_pred_m.detach().numpy())
-np.savetxt('y_pred_v_final', y_pred_v.detach().numpy())
+    if i % 100 == 0:
+        print(f"Step {i}: Loss = {loss.item()}")
+
+y_pred_m_value = y_pred_m.detach().cpu().numpy()
+y_pred_v_value = y_pred_v.detach().cpu().numpy()
+
+np.savetxt('y_pred_m_final', y_pred_m_value)
+np.savetxt('y_pred_v_final', y_pred_v_value)
+
 print("--- %s Elapsed time ---" % (time.time() - start_time))
